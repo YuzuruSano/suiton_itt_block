@@ -1,0 +1,15 @@
+<?php xml version="1.0"?>
+<schema version="0.3">
+    <table name="btItt">
+        <field name="bID" type="I">
+            <key/>
+            <unsigned/>
+        </field>
+        <field name="titleItt" type="C" size="255"></field>
+        <field name="fIDItt" type="I">
+            <unsigned/>
+            <default value="0"/>
+        </field>
+        <field name="descItt" type="XL"></field>
+    </table>
+</schema>
