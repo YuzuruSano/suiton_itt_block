@@ -29,6 +29,7 @@ class Controller extends BlockController
     protected $btCacheBlockOutputOnPost = true;
     protected $btCacheBlockOutputForRegisteredUsers = true;
     protected $btCacheBlockOutputLifetime = 0;
+    protected $btExportPageColumns = array('internalLinkCIDItt');
 
     public function getBlockTypeDescription()
     {
@@ -56,6 +57,11 @@ class Controller extends BlockController
         return $str;
     }
 
+    public function view()
+    {
+        $this->set('linkURL', $this->getLinkURL());
+    }
+
     public function getContentEditMode()
     {
         return LinkAbstractor::translateFromEditMode($this->content);
@@ -80,6 +86,30 @@ class Controller extends BlockController
         return File::getByID($this->fIDItt);
     }
 
+    public function getExternalLink()
+    {
+        return $this->externalLinkItt;
+    }
+
+    public function getInternalLinkCID()
+    {
+        return $this->internalLinkCIDItt;
+    }
+
+    public function getLinkURL()
+    {
+        if (!empty($this->externalLinkItt)) {
+            $sec = \Core::make('helper/security');
+
+            return $sec->sanitizeURL($this->externalLinkItt);
+        } elseif (!empty($this->internalLinkCIDItt)) {
+            $linkToC = Page::getByID($this->internalLinkCIDItt);
+
+            return (empty($linkToC) || $linkToC->error) ? '' : Core::make('helper/navigation')->getLinkToCollection($linkToC);
+        } else {
+            return '';
+        }
+    }
 
     public function export(\SimpleXMLElement $blockNode)
     {
@@ -97,13 +127,28 @@ class Controller extends BlockController
     public function save($args) {
         $args = $args + array(
             'fIDItt' => 0,
+            'linkType' => 0,
+            'externalLinkItt' => '',
+            'internalLinkCIDItt' => 0,
         );
         $args['fIDItt'] = ($args['fIDItt'] != '') ? $args['fIDItt'] : 0;
 
          if(isset($args['descItt'])) {
             $args['descItt'] = LinkAbstractor::translateTo($args['descItt']);
         }
-
+        switch (intval($args['linkType'])) {
+            case 1:
+                $args['externalLinkItt'] = '';
+                break;
+            case 2:
+                $args['internalLinkCIDItt'] = 0;
+                break;
+            default:
+                $args['externalLinkItt'] = '';
+                $args['internalLinkCIDItt'] = 0;
+                break;
+        }
+        unset($args['linkType']); //this doesn't get saved to the database (it's only for UI usage)
         //親クラスのメソッドを呼び出して保存
         parent::save($args);
     }

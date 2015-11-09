@@ -93,3 +93,43 @@ if ($controller->getFfIDItt() > 0) {
         print $editor->outputStandardEditor('descItt', $descItt);
     ?>
 </div>
+
+<div class="form-group">
+  <?php echo $form->label('imageLinkType', t('Image Link'))?>
+  <select name="linkType" id="imageLinkType" class="form-control" style="width: 60%;">
+    <option value="0" <?php echo (empty($externalLinkItt) && empty($internalLinkCIDItt) ? 'selected="selected"' : '')?>><?php echo t('None')?></option>
+    <option value="1" <?php echo (empty($externalLinkItt) && !empty($internalLinkCIDItt) ? 'selected="selected"' : '')?>><?php echo t('Another Page')?></option>
+    <option value="2" <?php echo (!empty($externalLinkItt) ? 'selected="selected"' : '')?>><?php echo t('External URL')?></option>
+  </select>
+</div>
+
+<div id="imageLinkTypePage" style="display: none;" class="form-group">
+  <?php echo $form->label('internalLinkCIDItt', t('Choose Page:'))?>
+  <?php echo Loader::helper('form/page_selector')->selectPage('internalLinkCIDItt', $internalLinkCIDItt); ?>
+</div>
+
+<div id="imageLinkTypeExternal" style="display: none;" class="form-group">
+  <?php echo $form->label('externalLinkItt', t('URL'))?>
+  <?php echo $form->text('externalLinkItt', $externalLinkItt, array('style'=>'width: 60%;')); ?>
+</div>
+
+<script type="text/javascript">
+refreshImageLinkTypeControls = function() {
+  var linkType = $('#imageLinkType').val();
+  $('#imageLinkTypePage').toggle(linkType == 1);
+  $('#imageLinkTypeExternal').toggle(linkType == 2);
+}
+
+$(document).ready(function() {
+  $('#imageLinkType').change(refreshImageLinkTypeControls);
+
+    $('div[data-checkbox-wrapper=constrain-image] input').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('div[data-fields=constrain-image]').show();
+        } else {
+            $('div[data-fields=constrain-image]').hide();
+        }
+    }).trigger('change');
+  refreshImageLinkTypeControls();
+});
+</script>
